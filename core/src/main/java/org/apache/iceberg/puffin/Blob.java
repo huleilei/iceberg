@@ -23,8 +23,9 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import org.apache.iceberg.relocated.com.google.common.base.Preconditions;
-import org.apache.iceberg.relocated.com.google.common.collect.ImmutableList;
 import org.apache.iceberg.relocated.com.google.common.collect.ImmutableMap;
+import org.apache.iceberg.relocated.com.google.common.collect.Lists;
+import org.apache.iceberg.relocated.com.google.common.collect.Maps;
 
 public final class Blob {
   private final String type;
@@ -57,12 +58,12 @@ public final class Blob {
     Preconditions.checkNotNull(blobData, "blobData is null");
     Preconditions.checkNotNull(properties, "properties is null");
     this.type = type;
-    this.inputFields = ImmutableList.copyOf(inputFields);
+    this.inputFields = copyList(inputFields);
     this.snapshotId = snapshotId;
     this.sequenceNumber = sequenceNumber;
     this.blobData = blobData;
     this.requestedCompression = requestedCompression;
-    this.properties = ImmutableMap.copyOf(properties);
+    this.properties = replicateMap(properties);
   }
 
   public String type() {
@@ -92,5 +93,17 @@ public final class Blob {
 
   public Map<String, String> properties() {
     return properties;
+  }
+
+  private static <E> List<E> copyList(List<E> toCopy) {
+    List<E> copy = Lists.newArrayListWithExpectedSize(toCopy.size());
+    copy.addAll(toCopy);
+    return copy;
+  }
+
+  private static <E, F> Map<E, F> replicateMap(Map<E, F> sourceMap) {
+    Map<E, F> map = Maps.newConcurrentMap();
+    map.putAll(sourceMap);
+    return map;
   }
 }
